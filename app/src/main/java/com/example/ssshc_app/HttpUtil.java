@@ -15,7 +15,6 @@ public class HttpUtil {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                Log.d("veve","HttpUtil.sendHttp 被调用");
                 HttpURLConnection connection = null;
                 int code = 0;
                 try{
@@ -41,14 +40,10 @@ public class HttpUtil {
                     in.close();
 
                     if(listener != null){
-                        Log.d("veve", "Http:onFinish");
                         listener.onFinish(respone.toString(),handler);
-
                     }
                 }catch (Exception e){
                     if(listener != null){
-                        Log.d("veve", "Http:onError");
-                        Log.d("veve", "run: "+e.toString()+e.getMessage());
                         System.out.println(code);
                         e.printStackTrace();
                         listener.onError(e);

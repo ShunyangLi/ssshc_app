@@ -1,36 +1,18 @@
 package com.example.ssshc_app;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.app.LoaderManager.LoaderCallbacks;
-import android.content.CursorLoader;
-import android.content.Loader;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.ContactsContract;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import java.util.ArrayList;
-import java.util.List;
 
-import static android.Manifest.permission.READ_CONTACTS;
+import com.example.ssshc_app.Util.SharedPreferencesUtils;
 
 /**
  * A login screen that offers login via email/password.
@@ -41,6 +23,7 @@ public class LoginActivity extends AppCompatActivity {
     // UI references.
     private EditText phone_number;
     private EditText Password;
+    private boolean first_login = true;
 
 
     @Override
@@ -50,8 +33,9 @@ public class LoginActivity extends AppCompatActivity {
 
 //        // Set up the login form.
         phone_number = (EditText) findViewById(R.id.phone);
-
         Password = (EditText) findViewById(R.id.password);
+        initData();
+
         Password.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
@@ -71,21 +55,17 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-
-        // TODO this part is get information
-//        Handler handler = new Handler(){
-//            @Override
-//            public void handleMessage(Message msg) {
-//                String respone = (String)msg.obj;
-//                show_text.setText(respone);
-//                Log.d("veve", "handleMessage: "+respone);
-//            }
-//        };
-//
-//        HttpUtil.sendHttpRequest("http://3.104.253.200/getTime",new HttpCallback(),handler);
-
     }
 
+
+    private void initData() {
+        if (!firstLogin()) {
+            setTextNameAndPassword();
+            attemptLogin();
+        } else {
+            first_login = true;
+        }
+    }
 
     /**
      * Attempts to sign in or register the account specified by the login form.
@@ -130,13 +110,18 @@ public class LoginActivity extends AppCompatActivity {
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-
             new Thread() {
                 public void run() {
                     token = LoginUtils.LoginByPost(phone,password);
                     System.out.println(token);
                 };
             }.start();
+
+
+            if (first_login) {
+                sotre_username_password();
+                first_login = false;
+            }
 
             Intent intent=new Intent(LoginActivity.this, AfterLogin.class);
             startActivity(intent);
@@ -159,6 +144,57 @@ public class LoginActivity extends AppCompatActivity {
     private boolean isPasswordValid(String password) {
         //TODO: Replace this with your own logic
         return password.length() > 4;
+    }
+
+
+
+    private boolean firstLogin() {
+        //获取SharedPreferences对象，使用自定义类的方法来获取对象
+        SharedPreferencesUtils helper = new SharedPreferencesUtils(this, "setting");
+        boolean first = helper.getBoolean("first", true);
+        if (first) {
+            //创建一个ContentVa对象（自定义的）设置不是第一次登录，,并创建记住密码和自动登录是默认不选，创建账号和密码为空
+            helper.putValues(new SharedPreferencesUtils.ContentValue("first", false),
+                    new SharedPreferencesUtils.ContentValue("autoLogin", true),
+                    new SharedPreferencesUtils.ContentValue("name", ""),
+                    new SharedPreferencesUtils.ContentValue("password", ""));
+            return true;
+        }
+        return false;
+    }
+
+
+    public void setTextNameAndPassword() {
+        phone_number.setText("" + getLocalName());
+        Password.setText("" + getLocalPassword());
+    }
+
+
+    public String getLocalName() {
+        //获取SharedPreferences对象，使用自定义类的方法来获取对象
+        SharedPreferencesUtils helper = new SharedPreferencesUtils(this, "setting");
+        return helper.getString("name");
+    }
+
+
+    /**
+     * 获得保存在本地的密码
+     */
+    public String getLocalPassword() {
+        //获取SharedPreferences对象，使用自定义类的方法来获取对象
+        SharedPreferencesUtils helper = new SharedPreferencesUtils(this, "setting");
+
+        return helper.getString("password");
+//       return password;   //解码一下
+
+    }
+
+
+    public void sotre_username_password() {
+
+        new SharedPreferencesUtils.ContentValue("password", Password.getText().toString());
+        new SharedPreferencesUtils.ContentValue("name", phone_number.getText().toString());
+
     }
 
 

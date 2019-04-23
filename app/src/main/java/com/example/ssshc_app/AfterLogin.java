@@ -6,6 +6,8 @@ import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.TextView;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class AfterLogin extends AppCompatActivity {
 
@@ -18,7 +20,7 @@ public class AfterLogin extends AppCompatActivity {
 
         show_text = (TextView) findViewById(R.id.show);
 
-        Handler handler = new Handler(){
+        final Handler handler = new Handler(){
             @Override
             public void handleMessage(Message msg) {
                 String respone = (String)msg.obj;
@@ -27,6 +29,25 @@ public class AfterLogin extends AppCompatActivity {
             }
         };
 
-        HttpUtil.sendHttpRequest("http://3.104.253.200/getTime",new HttpCallback(),handler);
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                GetUtil.GetOrder(handler);
+            }
+        }, 0 , 1000);
+
+
+
+//        Handler handler = new Handler(){
+//            @Override
+//            public void handleMessage(Message msg) {
+//                String respone = (String)msg.obj;
+//                show_text.setText(respone);
+//                Log.d("veve", "handleMessage: "+respone);
+//            }
+//        };
+//
+//        HttpUtil.sendHttpRequest("http://3.104.253.200/getTime",new HttpCallback(),handler);
     }
 }

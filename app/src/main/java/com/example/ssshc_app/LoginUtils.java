@@ -1,7 +1,5 @@
 package com.example.ssshc_app;
 
-import android.util.Log;
-
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -10,7 +8,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 
 public class LoginUtils {
-    public static String LOGIN_URL = "http://192.168.1.144/login/";
+    public static String LOGIN_URL = "http://192.168.0.114/login";
 
     public static String LoginByPost(String phone_number,String passwd) {
         String msg = "";
