@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.ssshc_app.Util.AcceptUtil;
 import com.example.ssshc_app.Util.RefuseUtil;
@@ -56,7 +57,17 @@ public class OrderNotifity extends AppCompatActivity {
                 .setPositiveButton("Accept", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        accpet_http(phone_number, record_id);
+                        Handler handler = new Handler() {
+                            @Override
+                            public void handleMessage(Message msg) {
+                                if (msg.what == 200) {
+                                    Toast.makeText(OrderNotifity.this, "You get this order successfully!", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(OrderNotifity.this, "Sorry, you don't get this order", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        };
+                        accpet_http(handler, phone_number, record_id);
                         dialog.dismiss();
                     }
                 }).create();
@@ -122,14 +133,18 @@ public class OrderNotifity extends AppCompatActivity {
     }
 
 
-    public void accpet_http(final String username, final String record_id) {
+    public void accpet_http(final Handler handler, final String username, final String record_id) {
         new Thread() {
             @Override
             public void run() {
-                AcceptUtil.AcceptOrder(username, record_id);
+                int code = AcceptUtil.AcceptOrder(username, record_id);
+                Message msg = new Message();
+                msg.what = code;
+                handler.sendMessage(msg);
 
             }
         }.start();
+
     }
 
     public void init_data() {

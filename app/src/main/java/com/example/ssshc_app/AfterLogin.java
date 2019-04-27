@@ -17,10 +17,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.example.ssshc_app.Util.AcceptUtil;
 import com.example.ssshc_app.Util.GetBookingUtil;
 import com.example.ssshc_app.Util.GetUtil;
 import com.example.ssshc_app.Util.RefuseUtil;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -54,6 +56,7 @@ public class AfterLogin extends AppCompatActivity {
         setContentView(R.layout.empty_api);
 
         show_text = (TextView) findViewById(R.id.show);
+
         mNManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         set_phone();
         mOffTextView = new TextView(this);
@@ -308,5 +311,21 @@ public class AfterLogin extends AppCompatActivity {
         finish();
         startActivity(getIntent());
     }
+
+    // 唤起Google map的function
+//    public static boolean isPackageInled (String packagename){
+//        return new File("/data/data/" + packagename).exists();
+//    }
+//
+//    public void start_map() {
+//        if (isPackageInstalled("com.google.android.apps.maps")) {
+//            Uri gmmIntentUri = Uri.parse("google.navigation:q="+ address[0] + address[1] + address[2]);
+//            Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+//            mapIntent.setPackage("com.google.android.apps.maps");
+//            startActivity(mapIntent);
+//        } else {
+//            Toast.makeText(this, "not install google map", Toast.LENGTH_SHORT).show();
+//        }
+//    }
 
 }
