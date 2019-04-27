@@ -1,7 +1,8 @@
-package com.example.ssshc_app;
+package com.example.ssshc_app.Util;
 
 import android.os.Handler;
-import android.util.Log;
+
+import com.example.ssshc_app.HttpCallbackListner;
 
 import java.io.BufferedReader;
 import java.io.InputStream;

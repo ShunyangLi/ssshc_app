@@ -1,4 +1,6 @@
-package com.example.ssshc_app;
+package com.example.ssshc_app.Util;
+
+import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -8,10 +10,10 @@ import java.net.URL;
 import java.net.URLEncoder;
 
 public class LoginUtils {
-    public static String LOGIN_URL = "http://192.168.0.114/login";
+    public static String LOGIN_URL = "http://192.168.43.93/login";
 
     public static String LoginByPost(String phone_number,String passwd) {
-        String msg = "";
+        String msg = "ERROR";
         try{
             HttpURLConnection conn = (HttpURLConnection) new URL(LOGIN_URL).openConnection();
 
@@ -43,9 +45,9 @@ public class LoginUtils {
                 message.close();
                 msg = new String(message.toByteArray());
                 // maybe the the token
-                return msg;
+                msg =  get_json_data(msg);
             } else {
-                return "ERROR";
+                msg = "ERROR";
             }
 
 
@@ -53,8 +55,12 @@ public class LoginUtils {
         return msg;
     }
 
-    public String get_json_data(String json) {
-
-        return "A";
+    public static String get_json_data(String json) {
+        String res = "";
+        try{
+            JSONObject jObject = new JSONObject(json);
+            res = jObject.getString("username");
+        }catch (Exception e){e.printStackTrace();}
+        return res;
     }
 }
