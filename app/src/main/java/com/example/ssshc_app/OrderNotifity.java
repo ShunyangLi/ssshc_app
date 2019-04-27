@@ -3,6 +3,7 @@ package com.example.ssshc_app;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -60,6 +61,16 @@ public class OrderNotifity extends AppCompatActivity {
                     }
                 }).create();
         mDialog.show();
+
+        mDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                mDialog.cancel();
+                mDialog = null;
+                Intent refresh =new Intent(OrderNotifity.this, AfterLogin.class);
+                startActivity(refresh);
+            }
+        });
 
 
         mOffHandler = new Handler() {

@@ -15,7 +15,7 @@ public class AcceptUtil {
 
     public static int AcceptOrder(String username, String record_id) {
 
-        int code = 0;
+        int code = 404;
         try {
             URL url = new URL(LOGIN_URL);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();

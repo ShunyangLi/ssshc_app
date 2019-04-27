@@ -16,12 +16,11 @@ import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.widget.TextView;
-
+import android.widget.Toast;
 import com.example.ssshc_app.Util.AcceptUtil;
 import com.example.ssshc_app.Util.GetBookingUtil;
 import com.example.ssshc_app.Util.GetUtil;
 import com.example.ssshc_app.Util.RefuseUtil;
-
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -47,6 +46,7 @@ public class AfterLogin extends AppCompatActivity {
     private Notification notify1;
     Bitmap LargeBitmap = null;
     private static final int NOTIFYID_1 = 1;
+    private Timer timer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,8 +58,11 @@ public class AfterLogin extends AppCompatActivity {
         set_phone();
         mOffTextView = new TextView(this);
         init_bookings();
+        start_fetch_orders();
 
+    }
 
+    public void start_fetch_orders() {
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
@@ -73,7 +76,6 @@ public class AfterLogin extends AppCompatActivity {
                 }
             }
         }, 0 , 1000);
-
     }
 
     @Override
@@ -138,7 +140,6 @@ public class AfterLogin extends AppCompatActivity {
         try {
             save("notifity.txt", content);
         } catch (Exception e) {e.printStackTrace();}
-
         Looper.prepare();
         mDialog = new AlertDialog.Builder(this)
                 .setTitle("Order")//设置对话框的标题
@@ -156,12 +157,32 @@ public class AfterLogin extends AppCompatActivity {
                 .setPositiveButton("Accept", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        accpet_http(phone_number, record_id);
+                        Handler handler = new Handler() {
+                            @Override
+                            public void handleMessage(Message msg) {
+                                if (msg.what == 200) {
+                                    Toast.makeText(AfterLogin.this, "You get this order successfully!", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(AfterLogin.this, "Sorry, you don't get this order", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        };
+                        accpet_http(handler, phone_number, record_id);
                         mNManager.cancel(NOTIFYID_1);
                         dialog.dismiss();
                     }
                 }).create();
         mDialog.show();
+
+        mDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                mDialog.cancel();
+                mDialog = null;
+                Refresh();
+            }
+        });
+
 
 
         mOffHandler = new Handler() {
@@ -207,7 +228,6 @@ public class AfterLogin extends AppCompatActivity {
 
         Looper.loop();
 
-
     }
 
 
@@ -221,14 +241,18 @@ public class AfterLogin extends AppCompatActivity {
     }
 
 
-    public void accpet_http(final String username, final String record_id) {
+    public void accpet_http(final Handler handler, final String username, final String record_id) {
         new Thread() {
             @Override
             public void run() {
-                AcceptUtil.AcceptOrder(username, record_id);
+                int code = AcceptUtil.AcceptOrder(username, record_id);
+                Message msg = new Message();
+                msg.what = code;
+                handler.sendMessage(msg);
 
             }
         }.start();
+
     }
 
 
@@ -275,6 +299,14 @@ public class AfterLogin extends AppCompatActivity {
         FileOutputStream output = getApplicationContext().openFileOutput(filename, Context.MODE_PRIVATE);
         output.write(filecontent.getBytes());  //将String字符串以字节流的形式写入到输出流中
         output.close();         //关闭输出流
+    }
+
+    public void Refresh() {
+//        Intent refresh =new Intent(this, AfterLogin.class);
+//        startActivity(refresh);
+
+        finish();
+        startActivity(getIntent());
     }
 
 }

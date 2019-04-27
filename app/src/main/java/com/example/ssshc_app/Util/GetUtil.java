@@ -55,12 +55,13 @@ public class GetUtil {
                 myList.add(get_record_id(msg));
                 myList.add(get_booking(msg));
 
+            } else {
+                myList = new ArrayList<String>();
             }
 
         }catch (Exception e){
             e.printStackTrace();
         }
-
         return myList;
     }
 
