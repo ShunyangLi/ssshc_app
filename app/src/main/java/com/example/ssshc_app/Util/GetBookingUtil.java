@@ -71,12 +71,10 @@ public class GetBookingUtil {
             for (int i = 0; i < jsonArray.length(); i++) {
                 String final_res = "";
                 JSONObject jObject1 = (JSONObject) jsonArray.get(i);
-                final_res += "Adults: " + jObject1.getString("adults") + " Children: " + jObject1.getString("children") + "\n";
                 final_res += "Name: " + jObject1.getString("customer_name") + "\n";
                 final_res += "Date: " + jObject1.getString("date") + "\n";
                 final_res += "Start location: " + jObject1.getString("start_location") + "\n";
                 final_res += "Destination: " + jObject1.getString("destination") + "\n\n\n\n";
-
 
                 myList.add(final_res);
             }

@@ -3,18 +3,26 @@ package com.example.ssshc_app;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,6 +31,7 @@ import com.example.ssshc_app.Util.GetBookingUtil;
 import com.example.ssshc_app.Util.GetUtil;
 import com.example.ssshc_app.Util.RefuseUtil;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -37,6 +46,7 @@ public class AfterLogin extends AppCompatActivity {
     private List<String> my_booking;
 
     private TextView show_text;
+    private LinearLayout linearLayout;
     private String res = "";
 
     // set dialog
@@ -56,6 +66,7 @@ public class AfterLogin extends AppCompatActivity {
         setContentView(R.layout.empty_api);
 
         show_text = (TextView) findViewById(R.id.show);
+        linearLayout = (LinearLayout) findViewById(R.id.all_bookings);
 
         mNManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         set_phone();
@@ -95,13 +106,21 @@ public class AfterLogin extends AppCompatActivity {
     }
 
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public void set_notification() {
+        String channel_id = "Order";
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(channel_id, "SSSHC ORDERS",NotificationManager.IMPORTANCE_HIGH);
+            mNManager.createNotificationChannel(channel);
+        }
+
         Intent it = new Intent(AfterLogin.this, OrderNotifity.class);
         PendingIntent pit = PendingIntent.getActivity(AfterLogin.this, 0, it, 0);
 
         //设置图片,通知标题,发送时间,提示方式等属性
         Notification.Builder mBuilder = new Notification.Builder(this);
         mBuilder.setContentTitle("Orders")
+                .setChannelId(channel_id)
                 .setContentText("You got a new order")
                 .setSubText("Please have a check")
                 .setTicker("You receive ssshc orders")
@@ -137,6 +156,17 @@ public class AfterLogin extends AppCompatActivity {
         }
 
         show_text.setText(res);
+//        Log.d("veve", String.valueOf(linearLayout.getChildCount()));
+
+        String[] finalres = res.split("Destination: ");
+        String[] location = finalres[1].split(", ");
+
+        // TODO 动态添加start button
+        Looper.prepare();
+        linearLayout.addView(createButton(location));
+        Log.d("veve", String.valueOf(linearLayout.getChildCount()));
+        Looper.loop();
+
     }
 
     public void set_dialog(String content) {
@@ -307,25 +337,40 @@ public class AfterLogin extends AppCompatActivity {
     public void Refresh() {
 //        Intent refresh =new Intent(this, AfterLogin.class);
 //        startActivity(refresh);
-
         finish();
         startActivity(getIntent());
     }
 
+
+
+    public View createButton(final String[] location) {
+        final Button btn=new Button(AfterLogin.this);
+        btn.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        btn.setVisibility(View.VISIBLE);
+        btn.setText(R.string.start_order);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                 start_map(location);
+            }
+        });
+        return btn;
+    }
+
     // 唤起Google map的function
-//    public static boolean isPackageInled (String packagename){
-//        return new File("/data/data/" + packagename).exists();
-//    }
-//
-//    public void start_map() {
-//        if (isPackageInstalled("com.google.android.apps.maps")) {
-//            Uri gmmIntentUri = Uri.parse("google.navigation:q="+ address[0] + address[1] + address[2]);
-//            Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
-//            mapIntent.setPackage("com.google.android.apps.maps");
-//            startActivity(mapIntent);
-//        } else {
-//            Toast.makeText(this, "not install google map", Toast.LENGTH_SHORT).show();
-//        }
-//    }
+    public static boolean isPackageInled (String packagename){
+        return new File("/data/data/" + packagename).exists();
+    }
+
+    public void start_map(String[] address) {
+        if (isPackageInled("com.google.android.apps.maps")) {
+            Uri gmmIntentUri = Uri.parse("google.navigation:q="+ address[0] + " " + address[1] +" " + address[2]);
+            Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+            mapIntent.setPackage("com.google.android.apps.maps");
+            startActivity(mapIntent);
+        } else {
+            Toast.makeText(this, "not install google map", Toast.LENGTH_SHORT).show();
+        }
+    }
 
 }
