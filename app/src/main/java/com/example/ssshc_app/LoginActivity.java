@@ -139,7 +139,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void new_Activity() {
-        Intent intent=new Intent(LoginActivity.this, AfterLogin.class);
+        Intent intent=new Intent(LoginActivity.this, Bookings.class);
         startActivity(intent);
     }
 

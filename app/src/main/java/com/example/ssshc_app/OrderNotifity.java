@@ -78,7 +78,7 @@ public class OrderNotifity extends AppCompatActivity {
             public void onDismiss(DialogInterface dialog) {
                 mDialog.cancel();
                 mDialog = null;
-                Intent refresh =new Intent(OrderNotifity.this, AfterLogin.class);
+                Intent refresh =new Intent(OrderNotifity.this, Bookings.class);
                 startActivity(refresh);
             }
         });

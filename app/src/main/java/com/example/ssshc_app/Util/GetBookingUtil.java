@@ -20,6 +20,7 @@ public class GetBookingUtil {
     public static List<String> GetBooking(String username) {
         String msg = "";
         try {
+            myList = new ArrayList<String>();
             URL url = new URL(LOGIN_URL);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
@@ -74,7 +75,7 @@ public class GetBookingUtil {
                 final_res += "Name: " + jObject1.getString("customer_name") + "\n";
                 final_res += "Date: " + jObject1.getString("date") + "\n";
                 final_res += "Start location: " + jObject1.getString("start_location") + "\n";
-                final_res += "Destination: " + jObject1.getString("destination") + "\n\n\n\n";
+                final_res += "Destination: " + jObject1.getString("destination");
 
                 myList.add(final_res);
             }

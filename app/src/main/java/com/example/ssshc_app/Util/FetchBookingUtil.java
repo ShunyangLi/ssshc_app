@@ -11,7 +11,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GetUtil {
+public class FetchBookingUtil {
     public static String LOGIN_URL = "http://192.168.43.93/getStatus";
     public static List<String> myList = new ArrayList<String>();
 
