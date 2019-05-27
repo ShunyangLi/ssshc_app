@@ -19,7 +19,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.View;
@@ -30,8 +29,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.ssshc_app.Util.AcceptUtil;
-import com.example.ssshc_app.Util.GetBookingUtil;
 import com.example.ssshc_app.Util.FetchBookingUtil;
+import com.example.ssshc_app.Util.GetBookingUtil;
 import com.example.ssshc_app.Util.RefuseUtil;
 
 import java.io.File;
@@ -74,11 +73,7 @@ public class Bookings extends AppCompatActivity {
         set_phone();
         mOffTextView = new TextView(this);
 
-        try {
-            init_bookings();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        init_bookings();
 
         start_fetch_orders();
 
@@ -98,7 +93,7 @@ public class Bookings extends AppCompatActivity {
                     set_dialog(myres.get(1));
                 }
             }
-        }, 0 , 1000);
+        }, 2000 , 1000);
     }
 
     @Override
@@ -160,49 +155,91 @@ public class Bookings extends AppCompatActivity {
 
 
     public void init_bookings() {
+        final Handler handler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                StringBuilder res = (StringBuilder) msg.obj;
+                String[] start_location = res.toString().split("Destination: ")[1].split(", ");
+                String[] destination = res.toString().split("Start location: ")[1].split("Destination: ")[0].split(", ");
+                TextView tx = createTextView(LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.ALIGN_PARENT_RIGHT,
+                        20, 10, 20, res.toString());
 
+                linearLayout.addView(tx);
+                linearLayout.addView(createButton(destination, "Go To Start Location"));
+                linearLayout.addView(createButton(start_location, "Go To Destination"));
+                super.handleMessage(msg);
+            }
+        };
         new Thread() {
             @Override
             public void run() {
 
                 List<String> my_booking = GetBookingUtil.GetBooking(phone_number);
                 if (my_booking.size() != 0) {
-                    set_view_booking(my_booking);
+                    // set_view_booking(my_booking);
+                    // set_view_booking(my_booking);
+
+                    for (int i = 0; i < my_booking.size(); i ++) {
+                        StringBuilder res = new StringBuilder();
+                        res.append(my_booking.get(i));
+
+                        Message message = new Message();
+                        message.obj = res;
+                        handler.sendMessage(message);
+                    }
                 }
             }
         }.start();
     }
 
 
-    // TODO 设置显示接单记录
-    public void set_view_booking(List<String> my_booking) {
-
-
-        StringBuilder res = new StringBuilder();
-        // TODO 动态添加start button
-
-        Looper.prepare();
-        for (int i = 0; i < my_booking.size(); i ++) {
-            res.append(my_booking.get(i));
-
-            TextView tx= createTextView(LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.ALIGN_PARENT_RIGHT,
-                    20, 10, 20, res.toString());
-            linearLayout.addView(tx);
-
-            String[] finalres = res.toString().split("Destination: ");
-            String[] location = finalres[1].split(", ");
-            linearLayout.addView(createButton(location));
-
-            Log.d("veve",res.toString());
-            res = new StringBuilder();
-
-        }
-        Log.d("veve", String.valueOf(linearLayout.getChildCount()));
-
-        Looper.loop();
-
-    }
+//    // TODO 不咋好用，改用handler
+//    public void set_view_booking(List<String> my_booking) {
+//
+//        Looper.prepare();
+//        for (int i = 0; i < my_booking.size(); i ++) {
+//            StringBuilder res = new StringBuilder();
+//            res.append(my_booking.get(i));
+//
+//            TextView tx = createTextView(LinearLayout.LayoutParams.WRAP_CONTENT,
+//                    LinearLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.ALIGN_PARENT_RIGHT,
+//                    20, 10, 20, res.toString());
+//            linearLayout.addView(tx);
+//
+//
+//            String[] start_location = res.toString().split("Destination: ")[1].split(", ");
+//            String[] destination = res.toString().split("Start location: ")[1].split("Destination: ")[0].split(", ");
+//
+//
+//            linearLayout.addView(createButton(destination, "Go To Start Location"));
+//            linearLayout.addView(createButton(start_location, "Go To Destination"));
+//
+//            // TODO not working well
+//
+////            Button start_button = (Button)createButton(destination);
+////            start_button.setText(R.string.start_order);
+////
+////            Button dest_button = (Button) createButton(start_location);
+////            dest_button.setText(R.string.end_order);
+//
+////            RelativeLayout.LayoutParams lp=new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+////            lp.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+////            lp.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+////            lp.setMargins(0,0,20,0);
+////            start_button.setLayoutParams(lp);
+////
+////            lp=new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+////            lp.addRule(RelativeLayout.RIGHT_OF, start_button.getId());
+////            lp.setMargins(10,0,10,0);
+////            dest_button.setLayoutParams(lp);
+//
+//
+//            // Log.d("veve","Hello");
+//        }
+//        Looper.loop();
+//
+//    }
 
     public TextView createTextView(int layout_widh, int layout_height, int align,
                                int fontSize, int margin, int padding, final String content) {
@@ -211,16 +248,16 @@ public class Bookings extends AppCompatActivity {
         RelativeLayout.LayoutParams _params = new RelativeLayout.LayoutParams(
                 layout_widh, layout_height);
 
-        _params.setMargins(margin, margin, margin, margin);
+        _params.setMargins(margin, margin, margin, 0);
         _params.addRule(align);
         textView.setLayoutParams(_params);
 
         textView.setText(content);
         textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
         textView.setTextColor(Color.parseColor("#000000"));
-        textView.setBackgroundColor(0xff66ff66);
+        textView.setBackgroundColor(Color.parseColor("#6FDBD7"));
         // textView1.setBackgroundColor(0xff66ff66); // hex color 0xAARRGGBB
-        textView.setPadding(padding, padding, padding, padding);
+        textView.setPadding(padding, padding, padding, 0);
 
         return textView;
 
@@ -401,26 +438,18 @@ public class Bookings extends AppCompatActivity {
 
 
 
-    public View createButton(String[] location) {
-        int margin = 10;
-        int align = RelativeLayout.ALIGN_PARENT_RIGHT;
+    public View createButton(String[] location, final String content) {
+
         final String[] des = location;
+        Button btn=new Button(this);
 
-        Button btn=new Button(Bookings.this);
-        RelativeLayout.LayoutParams _params = new RelativeLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-
-        _params.setMargins(margin,margin,margin,margin);
-        _params.addRule(align);
-
-        btn.setLayoutParams(_params);
         btn.setVisibility(View.VISIBLE);
-        btn.setText(R.string.start_order);
+        btn.setText(content);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                Log.d("veve", "Onclick!!! " + des[0] + "\n");
+                // Log.d("veve", "Onclick!!! " + des[0] + "\n");
                 start_map(des);
             }
         });

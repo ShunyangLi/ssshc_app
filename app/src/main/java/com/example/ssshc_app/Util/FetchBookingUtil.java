@@ -18,6 +18,7 @@ public class FetchBookingUtil {
     public static List<String> GetOrder(String username) {
         String msg = "";
         try{
+            myList = new ArrayList<String>();
             URL url = new URL(LOGIN_URL);
             HttpURLConnection connection = (HttpURLConnection)url.openConnection();
 
